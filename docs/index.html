@@ -85,9 +85,9 @@
       transition: color 0.3s ease, transform 0.3s ease;
     }
 
-    .bajo { color: #4CAF50; transform: scale(1.1); }   /* Verde */
-    .medio { color: #FFC107; transform: scale(1.1); }  /* Amarillo */
-    .alto { color: #F44336; transform: scale(1.1); }   /* Rojo */
+    .bajo { color: #4CAF50; transform: scale(1.1); }   
+    .medio { color: #FFC107; transform: scale(1.1); }  
+    .alto { color: #F44336; transform: scale(1.1); }   
 
     footer {
       margin-top: 25px;
@@ -136,9 +136,9 @@
 
     async function predecir() {
       const s = parseFloat(document.getElementById('sueno').value);
-      const c = parseFloat(document.getElementById('cafe').value)* 0.6;
+      const c = parseFloat(document.getElementById('cafe').value);
       const e = parseFloat(document.getElementById('ejercicio').value);
-      const p = parseFloat(document.getElementById('pantalla').value)* 0.7;
+      const p = parseFloat(document.getElementById('pantalla').value);
       const salida = document.getElementById('resultado');
 
       if ([s, c, e, p].some(isNaN)) {
@@ -168,3 +168,4 @@
   </script>
 </body>
 </html>
+
