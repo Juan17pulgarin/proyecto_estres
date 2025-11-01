@@ -136,9 +136,9 @@
 
     async function predecir() {
       const s = parseFloat(document.getElementById('sueno').value);
-      const c = parseFloat(document.getElementById('cafe').value);
+      const c = parseFloat(document.getElementById('cafe').value)* 0.6;
       const e = parseFloat(document.getElementById('ejercicio').value);
-      const p = parseFloat(document.getElementById('pantalla').value);
+      const p = parseFloat(document.getElementById('pantalla').value)* 0.7;
       const salida = document.getElementById('resultado');
 
       if ([s, c, e, p].some(isNaN)) {
@@ -153,10 +153,8 @@
         const pred = await model.executeAsync(entrada);
         const data = await pred.data();
 
-        // Obtener índice con mayor probabilidad
         const idx = data.indexOf(Math.max(...data));
 
-        // Mostrar resultado con emoji y color
         salida.textContent = "Nivel de Estrés: " + etiquetas[idx];
         salida.className = "resultado " + clases[idx];
       } catch (error) {
