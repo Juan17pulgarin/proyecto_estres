@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Predicción del Nivel de Estrés (IA)</title>
+
+  <!-- TensorFlow.js -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.20.0"></script>
+
+  <style>
+    :root {
+      --bajo: #4CAF50;
+      --medio: #FFC107;
+      --alto: #F44336;
+      --fondo: #f4f7fb;
+      --card: #fff;
+      --azul: #3b82f6;
+    }
+
+    body {
+      background: var(--fondo);
+      font-family: 'Segoe UI', Roboto, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      overflow-x: hidden;
+    }
+
+    h1 {
+      color: var(--azul);
+      font-weight: 600;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    p {
+      text-align: center;
+      color: #555;
+      font-size: 16px;
+      margin-bottom: 20px;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 30px;
+      width: 340px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    label {
+      display: block;
+      text-align: left;
+      font-weight: 500;
+      margin-top: 10px;
+      color: #444;
+    }
+
+    input[type="number"] {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      text-align: center;
+      transition: border-color 0.3s;
+    }
+
+    input[type="number"]:focus {
+      border-color: var(--azul);
+      outline: none;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: var(--azul);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      margin-top: 15px;
+      cursor: pointer;
+      transition: background 0.3s ease, transform 0.2s ease;
+    }
+
+    button:hover {
+      background: #2563eb;
+      transform: scale(1.03);
+    }
+
+    .resultado {
+      margin-top: 25px;
+      font-size: 22px;
+      font-weight: 600;
+      color: #333;
+      transition: all 0.3s;
+    }
+
+    .resultado.bajo { color: var(--bajo); transform: scale(1.1); }
+    .resultado.medio { color: var(--medio); transform: scale(1.1); }
+    .resultado.alto { color: var(--alto); transform: scale(1.1); }
+
+    footer {
+      margin-top: 25px;
+      font-size: 13px;
+      color: #777;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>🧠 Predicción del Nivel de Estrés</h1>
+  <p>Introduce tus datos diarios y obtén una estimación de tu nivel de estrés.</p>
+
+  <div class="card">
+    <label>Horas frente a pantalla:</label>
+    <input type="number" id="inputScreen" min="0" max="16" placeholder="Ej: 6" />
+
+    <label>Minutos de ejercicio:</label>
+    <input type="number" id="inputExercise" min="0" max="180" placeholder="Ej: 45" />
+
+    <label>Tazas de café:</label>
+    <input type="number" id="inputCoffee" min="0" max="10" placeholder="Ej: 3" />
+
+    <label>Horas de sueño:</label>
+    <input type="number" id="inputSleep" min="0" max="12" placeholder="Ej: 7" />
+
+    <button onclick="predecir()">Predecir Estrés</button>
+
+    <div id="resultado" class="resultado">Resultado: —</div>
+  </div>
+
+  <footer>Desarrollado con ❤️ y TensorFlow.js</footer>
+
+  <script>
+    let model;
+
+    async function loadModel() {
+      try {
+        model = await tf.loadGraphModel('folder/model.json');
+        console.log("✅ Modelo cargado correctamente");
+      } catch (err) {
+        console.error("Error cargando modelo:", err);
+        alert("Error al cargar el modelo. Revisa la consola.");
+      }
+    }
+
+    async function predecir() {
+      const screen = parseFloat(document.getElementById("inputScreen").value);
+      const exercise = parseFloat(document.getElementById("inputExercise").value);
+      const coffee = parseFloat(document.getElementById("inputCoffee").value);
+      const sleep = parseFloat(document.getElementById("inputSleep").value);
+      const resultado = document.getElementById("resultado");
+
+      if ([screen, exercise, coffee, sleep].some(isNaN)) {
+        resultado.textContent = "Por favor completa todos los campos.";
+        resultado.className = "resultado";
+        return;
+      }
+
+      const inputTensor = tf.tensor2d([[screen, exercise, coffee, sleep]]);
+      const pred = await model.executeAsync(inputTensor);
+      const data = await pred.data();
+      const clases = ["Bajo 😌", "Medio 😐", "Alto 😡"];
+      const idx = data.indexOf(Math.max(...data));
+      const clase = clases[idx];
+
+      resultado.textContent = `Nivel de Estrés: ${clase}`;
+      resultado.className = `resultado ${["bajo","medio","alto"][idx]}`;
+    }
+
+    loadModel();
+  </script>
+</body>
+</html>
