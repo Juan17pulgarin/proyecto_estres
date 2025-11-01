@@ -7,93 +7,20 @@
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.20.0"></script>
 
   <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #f4f7fa;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 30px;
-      margin: 0;
-    }
-
-    h1 {
-      color: #0078d7;
-      margin-bottom: 15px;
-      text-align: center;
-    }
-
-    .box {
-      background: #fff;
-      border-radius: 14px;
-      padding: 25px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      width: 340px;
-      text-align: center;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .box:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-    }
-
-    p {
-      font-weight: 500;
-      color: #333;
-      margin: 10px 0 5px;
-    }
-
-    input {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 10px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      font-size: 15px;
-      text-align: center;
-      transition: border-color 0.3s;
-    }
-
-    input:focus {
-      border-color: #0078d7;
-      outline: none;
-    }
-
-    button {
-      background: #0078d7;
-      color: white;
-      border: none;
-      padding: 10px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 16px;
-      width: 100%;
-      margin-top: 10px;
-      transition: background 0.3s, transform 0.2s;
-    }
-
-    button:hover {
-      background: #005bb5;
-      transform: scale(1.02);
-    }
-
-    .resultado {
-      margin-top: 20px;
-      font-size: 22px;
-      font-weight: 600;
-      transition: color 0.3s ease, transform 0.3s ease;
-    }
-
+    body { font-family: 'Segoe UI', sans-serif; background: #f4f7fa; display: flex; flex-direction: column; align-items: center; padding: 30px; margin: 0; }
+    h1 { color: #0078d7; margin-bottom: 15px; text-align: center; }
+    .box { background: #fff; border-radius: 14px; padding: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 340px; text-align: center; transition: transform 0.3s ease, box-shadow 0.3s ease; }
+    .box:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
+    p { font-weight: 500; color: #333; margin: 10px 0 5px; }
+    input { width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 6px; border: 1px solid #ccc; font-size: 15px; text-align: center; transition: border-color 0.3s; }
+    input:focus { border-color: #0078d7; outline: none; }
+    button { background: #0078d7; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-size: 16px; width: 100%; margin-top: 10px; transition: background 0.3s, transform 0.2s; }
+    button:hover { background: #005bb5; transform: scale(1.02); }
+    .resultado { margin-top: 20px; font-size: 22px; font-weight: 600; transition: color 0.3s ease, transform 0.3s ease; }
     .bajo { color: #4CAF50; transform: scale(1.1); }   
     .medio { color: #FFC107; transform: scale(1.1); } 
     .alto { color: #F44336; transform: scale(1.1); }   
-
-    footer {
-      margin-top: 25px;
-      color: #777;
-      font-size: 13px;
-    }
+    footer { margin-top: 25px; color: #777; font-size: 13px; }
   </style>
 </head>
 
@@ -120,19 +47,9 @@
   <footer>Desarrollado con ❤️ y TensorFlow.js</footer>
 
   <script>
-    let model;
     const etiquetas = ["Bajo 😌", "Medio 😐", "Alto 😡"];
     const clases = ["bajo", "medio", "alto"];
-
-    async function loadModel() {
-      try {
-        model = await tf.loadLayersModel('folder/model.json');
-        console.log("✅ Modelo cargado correctamente");
-      } catch (err) {
-        console.error("❌ Error cargando el modelo:", err);
-        alert("No se pudo cargar el modelo. Verifica la ruta o revisa la consola (F12).");
-      }
-    }
+    let model; 
 
     async function predecir() {
       const s = parseFloat(document.getElementById('sueno').value);
@@ -147,9 +64,20 @@
         return;
       }
 
-      const entrada = tf.tensor2d([[s, c, e, p]]);
+      if (!model) {
+        try {
+          salida.textContent = "Cargando modelo… ⏳";
+          model = await tf.loadLayersModel('folder/model.json'); 
+          console.log("✅ Modelo cargado correctamente");
+        } catch (err) {
+          console.error("❌ Error cargando el modelo:", err);
+          salida.textContent = "❌ Error cargando el modelo";
+          return;
+        }
+      }
 
       try {
+        const entrada = tf.tensor2d([[s, c, e, p]]);
         const pred = model.predict(entrada);
         const data = await pred.data();
         const idx = data.indexOf(Math.max(...data));
@@ -162,8 +90,6 @@
         salida.className = "resultado";
       }
     }
-
-    loadModel();
   </script>
 </body>
 </html>
