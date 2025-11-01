@@ -1,81 +1,91 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Predicción de Nivel de Estrés 🧠</title>
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.20.0"></script>
   <style>
     body {
-      font-family: "Poppins", sans-serif;
-      background: linear-gradient(135deg, #a2d2ff, #bde0fe);
-      text-align: center;
-      padding: 40px;
+      font-family: 'Segoe UI', sans-serif;
+      background: #f4f7fa;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px;
     }
-    .card {
+    h1 { color: #0078d7; }
+    .box {
       background: white;
-      padding: 20px;
-      border-radius: 20px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-      max-width: 400px;
-      margin: auto;
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      width: 320px;
     }
     input {
-      width: 80%;
-      padding: 8px;
-      margin: 10px;
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 6px;
       border: 1px solid #ccc;
-      border-radius: 10px;
+      font-size: 15px;
+      text-align: center;
     }
     button {
-      background: #0077b6;
+      background: #0078d7;
       color: white;
       border: none;
-      padding: 10px 20px;
-      border-radius: 12px;
+      padding: 10px;
+      border-radius: 6px;
       cursor: pointer;
+      font-size: 16px;
+      width: 100%;
     }
-    button:hover { background: #023e8a; }
+    .resultado {
+      margin-top: 15px;
+      font-size: 20px;
+      font-weight: 600;
+    }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h1>🧘‍♀️ Predicción de Estrés</h1>
-    <p>Ingresa tus valores y presiona predecir</p>
-
-    <input id="edad" type="number" placeholder="Edad" />
-    <input id="horas" type="number" placeholder="Horas de sueño" />
-    <input id="actividad" type="number" placeholder="Nivel de actividad física (1-10)" />
-    <input id="presion" type="number" placeholder="Presión arterial" />
-    <br>
+  <h1>Predicción de Estrés (IA)</h1>
+  <div class="box">
+    <p>Horas de sueño:</p>
+    <input type="number" id="sueno" placeholder="Ej: 6">
+    <p>Tazas de café:</p>
+    <input type="number" id="cafe" placeholder="Ej: 2">
+    <p>Minutos de ejercicio:</p>
+    <input type="number" id="ejercicio" placeholder="Ej: 30">
+    <p>Horas frente a pantalla:</p>
+    <input type="number" id="pantalla" placeholder="Ej: 8">
     <button onclick="predecir()">Predecir</button>
-    <h2 id="resultado"></h2>
+    <div class="resultado" id="resultado">Nivel: —</div>
   </div>
 
   <script>
     let model;
-    async function cargarModelo() {
+    const etiquetas = ["Bajo", "Medio", "Alto"];
+
+    async function loadModel() {
       model = await tf.loadGraphModel('folder/model.json');
-      console.log("Modelo cargado correctamente ✅");
+      console.log("Modelo cargado correctamente");
     }
 
     async function predecir() {
-      const edad = parseFloat(document.getElementById("edad").value);
-      const horas = parseFloat(document.getElementById("horas").value);
-      const actividad = parseFloat(document.getElementById("actividad").value);
-      const presion = parseFloat(document.getElementById("presion").value);
+      const s = parseFloat(document.getElementById('sueno').value);
+      const c = parseFloat(document.getElementById('cafe').value);
+      const e = parseFloat(document.getElementById('ejercicio').value);
+      const p = parseFloat(document.getElementById('pantalla').value);
 
-      const entrada = tf.tensor2d([[edad, horas, actividad, presion]]);
-      const prediccion = model.predict(entrada);
-      const valores = await prediccion.array();
-      const nivel = valores[0].indexOf(Math.max(...valores[0]));
-
-      const etiquetas = ["Bajo", "Medio", "Alto"];
-      document.getElementById("resultado").innerText =
-        `Nivel de estrés: ${etiquetas[nivel]} 😌`;
+      const entrada = tf.tensor2d([[s, c, e, p]]);
+      const pred = await model.executeAsync(entrada);
+      const data = await pred.data();
+      const idx = data.indexOf(Math.max(...data));
+      document.getElementById('resultado').textContent = "Nivel: " + etiquetas[idx];
     }
 
-    cargarModelo();
+    loadModel();
   </script>
 </body>
 </html>
